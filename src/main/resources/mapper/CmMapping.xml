@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xcy.dao.CmDao">
+
+	<insert id="insertPicByMacId">
+		INSERT INTO cm_picture ( cm_picture.MACID,
+		cm_picture.PICID,
+		cm_picture.CONTEXT )
+		VALUES
+		( #{macId}, #{picId},
+		#{context} )
+	</insert>
+
+	<insert id="insertHeartBeat">
+		INSERT INTO cm_heart_beat ( cm_heart_beat.MACID,
+		cm_heart_beat.HEARTID, cm_heart_beat.MACIP, cm_heart_beat.MACPORT )
+		VALUES
+		(
+		#{macId}, #{heartId}, #{ip}, #{port} )
+	</insert>
+
+	<insert id="insertMac">
+		INSERT INTO cm_mac ( cm_mac.USERID, cm_mac.MACID,
+		cm_mac.MACJC, cm_mac.ROADID, cm_mac.TOWERID )
+		VALUES
+		( #{userId}, #{macId}, #{macJc}, #{roadId}, #{towerId}
+		)
+	</insert>
+
+	<resultMap type="com.xcy.pojo.HeartBeat" id="hMap">
+		<result column="macId" property="macId" />
+		<result column="heardId" property="heardId" />
+		<result column="macIp" property="macIp" />
+		<result column="macPort" property="macPort" />
+	</resultMap>
+	<resultMap type="com.xcy.pojo.CmPicture" id="pMap">
+		<result column="id" property="id" />
+		<result column="picid" property="picid" />
+		<result column="macid" property="macid" />
+		<result column="context" property="context" />
+	</resultMap>
+	<resultMap type="com.xcy.pojo.CmMac" id="mMap">
+		<result column="userId" property="userId" />
+		<result column="macJc" property="macJc" />
+		<result column="macId" property="macId" />
+		<result column="roadId" property="roadId" />
+		<result column="towerId" property="towerId" />
+	</resultMap>
+	<select id="getMacByUserName" resultMap="mMap">
+	SELECT
+	a.MACID,
+	a.MACJC,
+	a.ROADID,
+	a.TOWERID
+	FROM
+	cm_mac a
+	WHERE
+	a.USERID = #{userId}
+	</select>
+	<select id="getPicByMacId" resultMap="pMap">
+		SELECT
+		a.PICID,
+		a.CONTEXT
+		FROM
+		cm_picture a
+		WHERE
+		a.MACID = #{macId}
+	</select>
+	<select id="getIpPortByMacId" resultMap="hMap">
+		SELECT
+		a.MACID,
+		a.HEARTID,
+		a.MACIP,
+		a.MACPORT
+		FROM
+		cm_heart_beat a
+		WHERE
+		a.MACID =
+		#{macId}
+		ORDER BY
+		a.ID DESC
+		LIMIT 0,1
+	</select>
+	<select id="getAllHeartBeatByMacId" resultMap="hMap">
+		SELECT
+		a.MACID,
+		a.HEARTID,
+		a.MACIP,
+		a.MACPORT
+		FROM
+		cm_heart_beat a
+		WHERE
+		a.MACID =
+		#{macId}
+		ORDER BY
+		a.ID DESC
+	</select>
+	<insert id="insertTemperatureByMacId">
+		INSERT INTO cm_temperature ( cm_temperature.MACID,
+		cm_temperature.TID,
+		cm_temperature.TEMPERATURE )
+		VALUES
+		( #{macId},
+		#{tId},
+		#{temperature} )
+	</insert>
+	<resultMap type="com.xcy.pojo.Temperature" id="tMap">
+		<result column="tId" property="tId" />
+		<result column="temperature" property="temperature" />
+	</resultMap>
+	<select id="getAllTemperatureByMacId" resultMap="tMap">
+		SELECT
+		t.TID,
+		t.TEMPERATURE
+		FROM
+		cm_temperature t
+		WHERE
+		t.MACID = #{macId}
+	</select>
+
+	<resultMap type="com.xcy.pojo.CmUser" id="uMap">
+		<result column="userName" property="userName" />
+		<result column="password" property="password" />
+	</resultMap>
+
+	<select id="getUserByUserName" resultMap="uMap">
+		SELECT
+		a.`PASSWORD`
+		FROM
+		cm_user a
+		WHERE
+		a.USERNAME = #{userName};
+	</select>
+
+	<select id="getMaxIndex" resultMap="pMap">
+		SELECT
+		a.ID,
+		a.CONTEXT
+		FROM
+		cm_picture a
+		WHERE
+		a.MACID = #{macId}
+		ORDER BY
+		a.ID DESC
+		LIMIT 0,1
+	</select>
+</mapper>

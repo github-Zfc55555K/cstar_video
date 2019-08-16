@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>电源设置</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!--标准mui.css-->
+	<link rel="stylesheet" href="css/mui.min.css">
+	<style>
+		html,
+		body,
+		.mui-content {
+			height: 0px;
+			margin: 0px;
+			background-color: #efeff4;
+		}
+
+		h5.mui-content-padded {
+			margin-left: 0px !important;
+			margin-top: 20px !important;
+		}
+
+		.mui-card {
+			margin: 0px;
+		}
+	</style>
+</head>
+
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">电源设置</h1>
+	</header>
+	<div class="mui-content">
+		<div class="mui-content-padded">
+			<h5 class="mui-content-padded">说明:设置警报的频率,请设置<总时间>大于其他参数</h5>
+			<h5 class="mui-content-padded" id="name"></h5>
+			<div class="mui-card">
+				<div class="mui-input-row">
+					<label>总时间(秒)</label>
+					<div class="mui-numbox" data-numbox-min='1'>
+						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+						<input class="mui-input-numbox" type="number" id="box1" />
+						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+					</div>
+				</div>
+				<div class="mui-input-row">
+					<label>警报间隔(秒)</label>
+					<div class="mui-numbox" data-numbox-min='1'>
+						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+						<input class="mui-input-numbox" type="number" id="box2" />
+						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+					</div>
+				</div>
+				<div class="mui-input-row">
+					<label>持续时间(秒)</label>
+					<div class="mui-numbox" data-numbox-min='1'>
+						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+						<input class="mui-input-numbox" type="number" id="box3" />
+						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+					</div>
+				</div>
+				
+			</div>
+			<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
+				id="btn">确认</button>
+
+		</div>
+	</div>
+	<script src="js/mui.min.js"></script>
+	<script src="libs/jquery-1.11.1.min.js"></script>
+	<script>
+		var macId = localStorage.getItem("macId");
+		mui.init();
+		var $$ = jQuery.noConflict();
+		document.getElementById("btn").addEventListener('tap', function (event) {
+			// mui.alert('当前值: ' + document.getElementById("box1").value + document.getElementById("box2").value + document.getElementById("box3").value, null, "确定");
+			var box1 = document.getElementById("box1").value;
+			var box2 = document.getElementById("box2").value;
+			var box3 = document.getElementById("box3").value;
+			if(parseInt(box1) < parseInt(box2) || parseInt(box1) < parseInt(box3)){
+				mui.alert("参数设置不合法！！");
+				return;
+			}
+			if(macId == "" || macId == null){
+				mui.alert("无确定的设备，错误:0003");
+				return;
+			}
+			$$.ajax({
+				url: "/alarmCtrl",
+				data: {
+					macId: macId,
+					box1: box1,
+					box2: box2,
+					box3: box3
+				},
+				success: function (result) {
+					if(result == "ok"){
+						mui.toast("指令发送成功");
+					}else{
+						mui.alert("发送指令失败:0002");
+					}
+				},
+				error: function () {
+					mui.alert("发送指令失败:0001");
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

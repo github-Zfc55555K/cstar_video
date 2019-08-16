@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>视频识别</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<!--标准mui.css-->
+	<link rel="stylesheet" href="css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+	<style>
+		.flex-container {
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: flex;
+			-webkit-flex-flow: row wrap;
+			justify-content: space-between;
+			text-align: center;
+		}
+
+		.mui-content-padded {
+			padding: 10px;
+		}
+
+		.mui-content-padded a {
+			margin: 3px;
+			width: 50px;
+			height: 50px;
+			display: inline-block;
+			text-align: center;
+			background-color: #fff;
+			border: 1px solid #ddd;
+			border-radius: 25px;
+			background-clip: padding-box;
+		}
+
+		.mui-content-padded a .mui-icon-extra {
+			margin-top: 12px;
+		}
+
+		.mui-spinner,
+		.mui-spinner-white {
+			margin-top: 12px
+		}
+
+		.active .mui-spinner-indicator {
+			background: #007AFF;
+		}
+
+		.mui-content a {
+			color: #8F8F94;
+		}
+
+		.mui-content a.active {
+			color: #007aff;
+		}
+	</style>
+</head>
+
+<body>
+
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">控制台</h1>
+	</header>
+	<div class="mui-content">
+		<ul class="mui-table-view mui-grid-view mui-grid-9">
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="picture">
+					<span class="mui-icon-extra mui-icon-extra-class"></span>
+					<div class="mui-media-body">监测数据</div>
+				</a></li>
+				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="info">
+					<span class="mui-icon-extra mui-icon-extra-topic"></span>
+					<div class="mui-media-body">运行参数</div>
+				</a></li>
+				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="photo">
+					<span class="mui-icon-extra mui-icon-extra-phone"></span>
+					<div class="mui-media-body">手动拍摄</div>
+				</a></li>
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#">
+					<span class="mui-icon-extra mui-icon-extra-heart"></span>
+					<div class="mui-media-body">心跳</div>
+				</a></li>
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="battery">
+					<span class="mui-icon-extra mui-icon-extra-gold"></span>
+					<div class="mui-media-body">电池设置</div>
+				</a></li>
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="alarm">
+					<span class="mui-icon-extra mui-icon-extra-notice"></span>
+					<div class="mui-media-body">警报设置</div>
+				</a></li>
+			
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="pixel">
+					<span class="mui-icon-extra mui-icon-extra-computer"></span>
+					<div class="mui-media-body">像素设置</div>
+				</a></li>
+			
+
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="reset">
+					<span class="mui-icon-extra mui-icon-extra-new"></span>
+					<div class="mui-media-body">复位</div>
+				</a></li>
+
+
+		</ul>
+	</div>
+	<div class="mui-content">
+		<div class="mui-content-padded">
+			<p id="macinfo">
+			</p>
+		</div>
+	</div>
+</body>
+<script src="js/mui.min.js"></script>
+<script src="libs/jquery-1.11.1.min.js"></script>
+<script>
+	var $$ = jQuery.noConflict();
+	mui.init({
+		swipeBack: true //启用右滑关闭功能
+	});
+	var active = null,
+		lastid, span;
+	//----------------------- macID 应该从首页选区
+	// var macId = "123456789";
+	var macId = localStorage.getItem("macId");
+	var road = localStorage.getItem("road");
+	var tower = localStorage.getItem("tower");
+	var str = "当前设备:<br>唯一标识：" + macId + "<br>道路信息：" + road + "<br>杆塔信息：" + tower;
+	$$("#macinfo").html(str);
+	mui.plusReady(function () {
+		// 在这里调用plus api
+		plus.storage.setItem("macId", macId);
+	});
+	mui(".mui-content").on("tap", "a", function () {
+		var id = this.getAttribute("id");
+		if (!active) {
+			this.classList.add("active");
+			if (id) {
+				span = this.querySelector("span");
+				span.classList.remove("mui-" + id);
+				span.classList.add("mui-" + id + "-filled");
+			}
+			active = this;
+		} else {
+			active.classList.remove("active");
+			if (lastid) {
+				span.classList.remove("mui-" + lastid + "-filled");
+				span.classList.add("mui-" + lastid);
+			}
+
+			this.classList.add("active");
+			if (id) {
+				span = this.querySelector("span");
+				span.classList.remove("mui-" + id);
+				span.classList.add("mui-" + id + "-filled");
+			}
+
+			active = this;
+		}
+		lastid = id;
+	});
+	var battery = document.getElementById("battery");
+	battery.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'battery.html',
+			id: 'battery',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var alarm = document.getElementById("alarm");
+	alarm.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'alarm.html',
+			id: 'alarm',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var photo = document.getElementById("photo");
+	photo.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'photo.html',
+			id: 'photo',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var pixel = document.getElementById("pixel");
+	pixel.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'pixel.html',
+			id: 'pixel',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var info = document.getElementById("info");
+	info.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'info.html',
+			id: 'info',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var picture = document.getElementById("picture");
+	picture.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'picture.html',
+			id: 'picture',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var reset = document.getElementById("reset");
+	reset.addEventListener('tap', function (event) {
+		console.log(macId);
+		$$.ajax({
+			url: "/reset",
+			data: {
+				macId: macId
+			},
+			success: function (result) {
+
+			},
+			error: function (error) {
+				mui.alert("发送指令失败:0001");
+			}
+		});
+	}, false);
+</script>
+
+</html>

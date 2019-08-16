@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>像素设置</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!--标准mui.css-->
+	<link rel="stylesheet" href="css/mui.min.css">
+	<link href="css/mui.picker.css" rel="stylesheet" />
+	<link href="css/mui.poppicker.css" rel="stylesheet" />
+	<style>
+		html,
+		body,
+		.mui-content {
+			height: 0px;
+			margin: 0px;
+			background-color: #efeff4;
+		}
+
+		h5.mui-content-padded {
+			margin-left: 0px !important;
+			margin-top: 20px !important;
+		}
+
+		.mui-card {
+			margin: 0px;
+		}
+	</style>
+</head>
+
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<h1 class="mui-title">选择设备</h1>
+	</header>
+	<div class="mui-content">
+		<div class="mui-content-padded">
+			<h5 class="mui-content-padded">说明：清选择你要操作的设备ID号</h5>
+			<ul class="mui-table-view" id="macInfo">
+				<!-- <li class="mui-table-view-cell">
+					<a class="mui-navigate-right" id="Item1">
+						Item 1
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" id="Item2">
+						Item 2
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" id="Item3">
+						Item 3
+					</a>
+				</li> -->
+			</ul>
+		</div>
+
+		<div class="mui-content">
+			<div class="mui-card">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell mui-collapse">
+						<a class="mui-navigate-right" href="#" id="add">添加设备</a>
+						<div class="mui-collapse-content">
+							<form class="mui-input-group">
+								<div class="mui-input-row">
+									<label>设备简称</label>
+									<input type="text" class="mui-input-clear" placeholder="设备简称" id="macJc">
+								</div>
+								<div class="mui-input-row">
+									<label>设备唯一标识</label>
+									<input type="text" class="mui-input-clear" placeholder="设备唯一标识" id="macId">
+								</div>
+								<div class="mui-input-row">
+									<label>道路号</label>
+									<input type="text" class="mui-input-clear" placeholder="道路号" id="roadId">
+								</div>
+
+								<div class="mui-input-row">
+									<label>杆塔号</label>
+									<input type="text" class="mui-input-clear" placeholder="杆塔号" id="towerId">
+								</div>
+
+								<div class="mui-button-row">
+									<button id="btn" class="mui-btn mui-btn-primary" type="button"
+										onclick="return false;">添加</button>&nbsp;&nbsp;
+								</div>
+							</form>
+						</div>
+					</li>
+
+				</ul>
+			</div>
+		</div>
+
+	</div>
+	<script src="js/mui.min.js"></script>
+	<script src="libs/jquery-1.11.1.min.js"></script>
+	<script>
+		var $$ = jQuery.noConflict();
+		(function ($, doc) {
+			$.init();
+			//进入设备详情页
+			mui('.mui-content').on('tap', 'a', function (e) {
+				var id = this.getAttribute('id');
+				var road = this.getAttribute('road');
+				var tower = this.getAttribute('tower');
+				if (id == "add") {
+					return;
+				}
+
+				if (id != null) {
+					// mui.alert(id);
+					localStorage.setItem("macId", id);
+				}
+				if (road != null) {
+					localStorage.setItem("road", road);
+				}
+				if (tower != null) {
+					localStorage.setItem("tower", tower);
+				}
+				mui.openWindow({
+					url: 'console.html',
+					id: 'console'
+				});
+
+			});
+			$.ready(function () {
+				var userName = localStorage.getItem("userName");
+				//加载 该用户下的所有设备
+				$$.ajax({
+					url: "getAllMacByUserName",
+					data: {
+						userName: userName
+					},
+					success: function (result) {
+						var str = "";
+						for (var i = 0; i < result.length; i++) {
+							str += '<li class="mui-table-view-cell"><a class="mui-navigate-right"tower="' + result[i].towerId + '" road="' + result[i].roadId + '" id="' + result[i].macId + '">' + result[i].macJc + '</a></li>';
+						}
+						$$("#macInfo").html(str);
+					},
+					error: function () {
+						mui.alert("网络错误：1003");
+					}
+				});
+
+			});
+		})(mui, document);
+
+		//添加设备
+		document.getElementById("btn").addEventListener('tap', function (event) {
+			var macJc = $$("#macJc").val();
+			var macId = $$("#macId").val();
+			var roadId = $$("#roadId").val();
+			var towerId = $$("#towerId").val();
+			var userName = localStorage.getItem("userName");
+			$$.ajax({
+				url: "insertmac",
+				data: {
+					macId: macId,
+					macJc: macJc,
+					roadId: roadId,
+					towerId: towerId,
+					userName: userName
+				},
+				success: function (result) {
+					if (result == "ok") {
+						mui.toast("添加设备成功");
+						$$.ajax({
+							url: "getAllMacByUserName",
+							data: {
+								userName: userName
+							},
+							success: function (result) {
+								var str = "";
+								for (var i = 0; i < result.length; i++) {
+									str += '<li class="mui-table-view-cell"><a class="mui-navigate-right"tower="' + result[i].towerId + '" road="' + result[i].roadId + '" id="' + result[i].macId + '">' + result[i].macJc + '</a></li>';
+								}
+								$$("#macInfo").html(str);
+							},
+							error: function () {
+								mui.alert("网络错误：1003");
+							}
+						});
+					} else {
+						mui.alert("添加失败");
+					}
+				},
+				error: function () {
+					mui.alert("网络错误：1003");
+				}
+			});
+			// mui.openWindow({
+			// 	url: 'console.html',
+			// 	id: 'console',
+			// 	preload: true,
+			// 	show: {
+			// 		aniShow: 'pop-in'
+			// 	},
+			// 	styles: {
+			// 		popGesture: 'hide'
+			// 	},
+			// 	waiting: {
+			// 		autoShow: false
+			// 	}
+			// });
+
+		});
+	</script>
+</body>
+
+</html>

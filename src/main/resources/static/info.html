@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>运行参数</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<!--标准mui.css-->
+	<link rel="stylesheet" href="css/mui.min.css">
+	<!--App自定义的css-->
+	<!--<link rel="stylesheet" type="text/css" href="../css/app.css"/>-->
+</head>
+
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">运行参数</h1>
+	</header>
+	<div class="mui-content">
+		<div class="mui-content-padded">
+			<h4>电池参数</h4>
+			<p>每隔 1 小时发送一次</p>
+			<h4>警报参数</h4>
+			<p>每隔 5 （秒） 响 1（次） 响 60 （秒）</p>
+			<h4>像素参数</h4>
+			<p>2592*1944</p>
+			<h4>心跳</h4>
+			<p id="hb"></p>
+
+		</div>
+	</div>
+</body>
+<script src="js/mui.min.js"></script>
+<script src="libs/jquery-1.11.1.min.js"></script>
+<script>
+	var $$ = jQuery.noConflict();
+	var macId = localStorage.getItem("macId");
+	mui.init({
+		swipeBack: true //启用右滑关闭功能
+	});
+	$$.ajax({
+		url: "/getHeartbeat",
+		data: {
+			macId : macId
+		},
+		success: function (result) {
+			var s = "";
+			for (var i = 0; i < result.length; i++) {
+				s += "时间：" + result[i].heartId + "ip:" + result[i].macIp + "端口号:" + result[i].macPort + "<br>";
+			}
+			$$("#hb").html(s);
+			console.log(result);
+		},
+		error: function () {
+			mui.alert("发送指令失败:0001");
+		}
+	});
+</script>
+
+</html>

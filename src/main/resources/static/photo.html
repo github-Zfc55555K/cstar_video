@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>手动拍摄</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<!--标准mui.css-->
+	<link rel="stylesheet" href="css/mui.min.css">
+</head>
+
+<body>
+
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">手动拍摄</h1>
+	</header>
+
+	<div class="mui-content">
+		<h5>说明：设置要拍摄的摄像头，请选择一个镜头进行拍摄</h5>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell">
+				<span>镜头1</span>
+				<div class="mui-switch mui-switch-blue mui-switch-mini">
+					<div class="mui-switch-handle"></div>
+				</div>
+			</li>
+			<li class="mui-table-view-cell">
+				<span>镜头2</span>
+				<div class="mui-switch mui-switch-blue mui-switch-mini">
+					<div class="mui-switch-handle"></div>
+				</div>
+			</li>
+			<li class="mui-table-view-cell">
+				<span>镜头3</span>
+				<div class="mui-switch mui-switch-blue mui-switch-mini">
+					<div class="mui-switch-handle"></div>
+				</div>
+			</li>
+		</ul>
+		<div class="mui-content">
+			<div class="mui-content-padded" id="content">
+				<!-- <p>这是图片放大预览示例，点击如下图片体验全屏预览功能</p>
+			<p>
+				<img src="images/yuantiao.jpg" data-preview-src="" data-preview-group="1" />
+			</p>
+			<p>图片全屏后，双击或双指缩放均可对图片进行放大、缩小操作，左右滑动可查看同组(data-preview-group相同的图片为一组)其它图片，点击会关闭预览</p>
+			<p>
+				<img src="images/muwu.jpg" data-preview-src="" data-preview-group="1" />
+			</p>
+			<p>第三张图片，纯粹为了占位： </p>
+			<p>
+				<img src="images/shuijiao.jpg" data-preview-src="" data-preview-group="1" />
+			</p> -->
+			</div>
+		</div>
+		<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
+			id="btn">确认</button>
+	</div>
+	<script src="js/mui.min.js"></script>
+	<script src="libs/jquery-1.11.1.min.js"></script>
+	<script>
+		mui.init({
+			swipeBack: true //启用右滑关闭功能
+		});
+		var macId = localStorage.getItem("macId");
+		var $$ = jQuery.noConflict();
+		var c1 = 0;
+		var c2 = 0;
+		var c3 = 0;
+		document.getElementById("btn").addEventListener('tap', function (event) {
+			// mui.alert('当前值: ' + c1 + c2 + c3, null, "确定");
+			var sum = c1 + c2 + c3;
+			if (sum != 1) {
+				mui.alert("请选择单个摄像头拍摄！");
+				return;
+			}
+			if(macId == "" || macId == null){
+				mui.alert("无确定的设备，错误:0003");
+				return;
+			}
+			$$.ajax({
+				url: "/photoCtrl",
+				data: {
+					macId: macId,
+					box1: c1,
+					box2: c2,
+					box3: c3
+				},
+				success: function (result) {
+					if(result == "ok"){
+						mui.toast("指令发送成功");
+					}else{
+						mui.alert("发送指令失败:0002");
+					}
+				},
+				error: function () {
+					mui.alert("发送指令失败:0001");
+				}
+			});
+			var i = 7;
+			var t = setInterval(() => {
+				$$("#content").html("拍摄中,等待......" + i + "秒");
+				if (i == 0) {
+					clearInterval(t);
+				}
+				i--;
+			}, 1000);
+			setTimeout(() => {
+				$$.ajax({
+					url: "/getMaxIndexPic",
+					data: {
+						macId: macId
+					},
+					success: function (data) {
+						var s = "";
+						var str = data.split("|");
+						var ss = encodeURI("data:image/jpg;base64," + str[1]);
+						s += '<p>实时照片</p><p><img src="' + ss + '" data-preview-src="" data-preview-group="1"><p>';
+						$$("#content").html(s);
+					},
+					error: function () {
+						mui.alert("发送指令失败:0001");
+					}
+				});
+			}, 8000);
+
+		});
+		mui('.mui-content .mui-switch').each(function () { //循环所有toggle
+            /**
+             * toggle 事件监听
+             */
+			this.addEventListener('toggle', function (event) {
+				//event.detail.isActive 可直接获取当前状态
+				if (event.detail.isActive) {
+					if (this.parentNode.querySelector('span').innerText == "镜头1") {
+						c1 = 1;
+						// console.log("c1="+c1);
+					} else if (this.parentNode.querySelector('span').innerText == "镜头2") {
+						c2 = 1;
+						// console.log("c2="+c2);
+					} else if (this.parentNode.querySelector('span').innerText == "镜头3") {
+						c3 = 1;
+						// console.log("c3="+c3);
+					}
+				} else {
+					if (this.parentNode.querySelector('span').innerText == "镜头1") {
+						c1 = 0;
+						// console.log("c1="+c1);
+					} else if (this.parentNode.querySelector('span').innerText == "镜头2") {
+						c2 = 0;
+						// console.log("c2="+c2);
+					} else if (this.parentNode.querySelector('span').innerText == "镜头3") {
+						c3 = 0;
+						// console.log("c3="+c3);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>
