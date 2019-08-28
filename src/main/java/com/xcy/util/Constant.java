@@ -23,6 +23,7 @@ public interface Constant {
 	 * 检测 报文中 分为 温度 摄像检测
 	 * TEMPERATURE 为温度
 	 * PHOTO 为摄像
+	 * 工作状态报文中 分为 基本信息 心跳 和 报警数据
 	 */
 	String JC_TYPE_TEMPERATURE = "01";
 	String JC_TYPE_PHOTO = "03";
@@ -30,6 +31,9 @@ public interface Constant {
 	int KZ_MSG_ALARM = 2; //警报设置
 	int KZ_MSG_RESET = 3;//复位
 	int KZ_MSG_PHOTO = 4;//手动拍摄
+	String ZT_TYPE_BASIC_INFO = "01";
+	String ZT_TYPE_HEART = "05";
+	String ZT_TYPE_ALARM = "09";
 	
 	/*
 	 * 字符填充 确保占位 不为空

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.xcy.pojo.CmMac;
 import com.xcy.pojo.CmPicture;
 import com.xcy.pojo.HeartBeat;
+import com.xcy.pojo.Temperature;
 import com.xcy.services.CmService;
 import com.xcy.services.UdpService;
 import com.xcy.util.Constant;
@@ -109,24 +110,13 @@ public class UdpController {
 	}
 
 	/*
-	 * 监测数据模块
+	 * 监测数据模块 图片 
 	 */
 	@ResponseBody
 	@RequestMapping(value = "getPicture", method = RequestMethod.GET)
-	public List<String> executePicture(String macId) throws IOException {
-		List<String> data = new ArrayList<String>();
-		List<CmPicture> list = this.cmService.getPicByMacId(NumberTransform.convertASCLLToHex(macId));
-
-		byte[] b = null;
-		for (CmPicture c : list) {
-			String str = c.getPicid() + "|";
-			b = NumberTransform.inputStreamToByte(c.getContext());
-			BASE64Encoder encoder = new BASE64Encoder();
-			String d = encoder.encode(b);
-			str += d;
-			data.add(str);
-		}
-		return data;
+	public List<String> executePicture(String macId,String alarm) throws IOException {
+		List<String> list = this.cmService.getPicByMacId(macId,Integer.parseInt(alarm));
+		return list;
 	}
 
 	/*
@@ -195,9 +185,16 @@ public class UdpController {
 			return "error";
 		}
 	}
+	
 	@ResponseBody
 	@RequestMapping(value = "getAllMacByUserName", method = RequestMethod.GET)
 	public List<CmMac> getMacByUserName(String userName){
 		return this.cmService.getMacByUserName(userName);
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "getAllTemperature", method = RequestMethod.GET)
+	public List<Temperature> getAllTemperatureByMacId(String macId){
+		return this.cmService.getAllTemperatureByMacId(NumberTransform.convertASCLLToHex(macId));
 	}
 }

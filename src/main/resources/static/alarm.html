@@ -32,7 +32,7 @@
 <body>
 	<header class="mui-bar mui-bar-nav">
 		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-		<h1 class="mui-title">电源设置</h1>
+		<h1 class="mui-title">报警设置</h1>
 	</header>
 	<div class="mui-content">
 		<div class="mui-content-padded">
@@ -41,7 +41,7 @@
 			<div class="mui-card">
 				<div class="mui-input-row">
 					<label>总时间(秒)</label>
-					<div class="mui-numbox" data-numbox-min='1'>
+					<div class="mui-numbox" data-numbox-min='0'>
 						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
 						<input class="mui-input-numbox" type="number" id="box1" />
 						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
@@ -49,7 +49,7 @@
 				</div>
 				<div class="mui-input-row">
 					<label>警报间隔(秒)</label>
-					<div class="mui-numbox" data-numbox-min='1'>
+					<div class="mui-numbox" data-numbox-min='0'>
 						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
 						<input class="mui-input-numbox" type="number" id="box2" />
 						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
@@ -57,13 +57,20 @@
 				</div>
 				<div class="mui-input-row">
 					<label>持续时间(秒)</label>
-					<div class="mui-numbox" data-numbox-min='1'>
+					<div class="mui-numbox" data-numbox-min='0'>
 						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
 						<input class="mui-input-numbox" type="number" id="box3" />
 						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
 					</div>
 				</div>
-				
+				<div class="mui-input-row">
+					<label>超声波距离(米)</label>
+					<div class="mui-numbox" data-numbox-min='0'>
+						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+						<input class="mui-input-numbox" type="number" id="box4" />
+						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+					</div>
+				</div>
 			</div>
 			<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
 				id="btn">确认</button>

@@ -93,7 +93,7 @@ public class NumberTransform {
 	}
 
 	public static String getData() {
-		return new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 	}
 
 	/*

@@ -5,10 +5,11 @@
 	<insert id="insertPicByMacId">
 		INSERT INTO cm_picture ( cm_picture.MACID,
 		cm_picture.PICID,
-		cm_picture.CONTEXT )
+		cm_picture.CONTEXT,
+		cm_picture.ALARM )
 		VALUES
 		( #{macId}, #{picId},
-		#{context} )
+		#{context},#{alarm} )
 	</insert>
 
 	<insert id="insertHeartBeat">
@@ -64,7 +65,7 @@
 		FROM
 		cm_picture a
 		WHERE
-		a.MACID = #{macId}
+		a.MACID = #{macId} AND a.ALARM = #{alarm}
 	</select>
 	<select id="getIpPortByMacId" resultMap="hMap">
 		SELECT

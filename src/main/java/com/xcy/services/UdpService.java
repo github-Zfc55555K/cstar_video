@@ -112,7 +112,7 @@ public class UdpService {
 		if (Constant.JC_TYPE_PHOTO.equals(message.getMsgType())) {
 			// 如果是摄像
 			String context = message.getMsgContent();
-			log.info("<监测报文>-------报文：" + context);
+			log.info("<监测报文>-------图片：" + context);
 			if (!context.startsWith("FFD8") || !context.endsWith("FFD9")) {
 				log.info("<监测报文>-----内容 :不完整（不是以FFD8开头 & FFD9结尾） 舍弃 !!");
 				return;
@@ -121,7 +121,7 @@ public class UdpService {
 			log.info("<监测报文>-----本次接收时间" + (t2 - time) + "毫秒");
 			byte[] b = NumberTransform.hexToBytes(context);
 			InputStream is = NumberTransform.byteToInputStream(b);
-			UdpService.udpService.cmService.insertPicByMacId(message.getMacId(), NumberTransform.getData(), is);
+			UdpService.udpService.cmService.insertPicByMacId(message.getMacId(), NumberTransform.getData(), is, 0);
 
 		} else if (Constant.JC_TYPE_TEMPERATURE.equals(message.getMsgType())) {
 			String context = message.getMsgContent();
@@ -141,12 +141,35 @@ public class UdpService {
 	}
 
 	/*
-	 * 处理状态报文 终端到服务器
+	 * 处理状态报文 终端到服务器 args[0] : ip args[1] : port
 	 */
-	public void executeZTerminalToServerTMessage(String ip, String port, Message message) {
-		// 上传心跳
-		UdpService.udpService.cmService.insertHeartBeat(message.getMacId(), NumberTransform.getData(), ip.substring(1),
-				port);
+	public void executeZTerminalToServerTMessage(Message message, long time, String... args) {
+		if (Constant.ZT_TYPE_ALARM.equals(message.getMsgType())) {
+			// 如果是报警数据
+			String context = message.getMsgContent();
+			log.info("<状态报文>-------图片：" + context);
+			if (!context.startsWith("FFD8") || !context.endsWith("FFD9")) {
+				log.info("<状态报文>-----内容 :不完整（不是以FFD8开头 & FFD9结尾） 舍弃 !!");
+				return;
+			}
+			long t2 = System.currentTimeMillis();
+			log.info("<状态报文>-----本次接收时间" + (t2 - time) + "毫秒");
+			byte[] b = NumberTransform.hexToBytes(context);
+			InputStream is = NumberTransform.byteToInputStream(b);
+			UdpService.udpService.cmService.insertPicByMacId(message.getMacId(), NumberTransform.getData(), is, 1);
+
+		} else if (Constant.ZT_TYPE_HEART.equals(message.getMsgType())) {
+			// 上传心跳
+			String context = message.getMsgContent();
+			log.info("<状态报文>-------心跳：" + context);
+			UdpService.udpService.cmService.insertHeartBeat(message.getMacId(), NumberTransform.getData(),
+					args[0].substring(1), args[1]);
+		}else if(Constant.ZT_TYPE_BASIC_INFO.equals(message.getMsgType())) {
+			//上传 基本信息
+			String context = message.getMsgContent();
+			log.info("<状态报文>-------基本信息：" + context);
+		}
+
 	}
 
 	/*

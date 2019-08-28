@@ -41,66 +41,68 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	private JedisConnectionFactory jedisConnectionFactory;
 
 	/*
-	 * 使用注解时自动生成 Key 
+	 * 使用注解时自动生成 Key
 	 */
 	@Bean
 	@Override
 	public KeyGenerator keyGenerator() {
 		return (o, method, objects) -> {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(o.getClass().getSimpleName());
-            stringBuilder.append(".");
-            stringBuilder.append(method.getName());
-            stringBuilder.append("(");
-            for (Object obj : objects) {
-                stringBuilder.append(obj.toString());
-            }
-            stringBuilder.append(")");
-            lg.info("缓存键值 -> [" + stringBuilder.toString() + "]");
-            return stringBuilder.toString();
-        };
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append(o.getClass().getSimpleName());
+			stringBuilder.append(".");
+			stringBuilder.append(method.getName());
+			stringBuilder.append("(");
+			for (Object obj : objects) {
+				stringBuilder.append(obj.toString());
+			}
+			stringBuilder.append(")");
+			lg.info("<缓存>---键值 -> [" + stringBuilder.toString() + "]");
+			return stringBuilder.toString();
+		};
 	}
 
 	@Bean
 	@Override
 	public CacheManager cacheManager() {
 		lg.info("初始化缓存服务器管理器，设置默认缓存过期时间600s");
-		return new RedisCacheManager(
-	            RedisCacheWriter.nonLockingRedisCacheWriter(jedisConnectionFactory),
-	            this.getRedisCacheConfigurationWithTtl(600), // 默认策略，未配置的 key 会使用这个
-	            this.getRedisCacheConfigurationMap() // 指定 key 策略
-	        );
+		return new RedisCacheManager(RedisCacheWriter.nonLockingRedisCacheWriter(jedisConnectionFactory),
+				this.getRedisCacheConfigurationWithTtl(600), // 默认策略，未配置的 key 会使用这个
+				this.getRedisCacheConfigurationMap() // 指定 key 策略
+		);
 	}
 
 	/*
-	 * 指定 自定义的缓存注解 并设置时间
-	 * 默认使用   @Cacheable(value = "DefaultKeyTest", keyGenerator = "keyGenerator")
+	 * 指定 自定义的缓存注解 并设置时间 默认使用 @Cacheable(value = "DefaultKeyTest", keyGenerator =
+	 * "keyGenerator")
 	 */
 	private Map<String, RedisCacheConfiguration> getRedisCacheConfigurationMap() {
-        Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
-        redisCacheConfigurationMap.put("heartBeatList", this.getRedisCacheConfigurationWithTtl(100));
-        return redisCacheConfigurationMap;
-    }
-	
+		Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
+		redisCacheConfigurationMap.put("TimeTo100S", this.getRedisCacheConfigurationWithTtl(100));
+		redisCacheConfigurationMap.put("TimeTo300S", this.getRedisCacheConfigurationWithTtl(300));
+		redisCacheConfigurationMap.put("TimeTo500S", this.getRedisCacheConfigurationWithTtl(500));
+		return redisCacheConfigurationMap;
+	}
+
 	/*
-	 * 设置 TTL 
+	 * 设置 TTL
 	 */
 	private RedisCacheConfiguration getRedisCacheConfigurationWithTtl(Integer seconds) {
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
+		Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(
+				Object.class);
+		ObjectMapper om = new ObjectMapper();
+		om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+		om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		jackson2JsonRedisSerializer.setObjectMapper(om);
 
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
-        redisCacheConfiguration = redisCacheConfiguration.serializeValuesWith(
-            RedisSerializationContext
-                .SerializationPair
-                .fromSerializer(jackson2JsonRedisSerializer)
-        ).entryTtl(Duration.ofSeconds(seconds));
+		RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
+		redisCacheConfiguration = redisCacheConfiguration
+				.serializeValuesWith(
+						RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
+				.entryTtl(Duration.ofSeconds(seconds));
 
-        return redisCacheConfiguration;
-    }
+		return redisCacheConfiguration;
+	}
+
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
 		// 设置序列化

@@ -12,8 +12,6 @@ import com.xcy.pojo.CmUser;
 import com.xcy.pojo.HeartBeat;
 import com.xcy.pojo.Temperature;
 
-import sun.java2d.cmm.kcms.CMM;
-
 /*
  * 数据层
  */
@@ -21,14 +19,14 @@ import sun.java2d.cmm.kcms.CMM;
 public interface CmDao {
 
 	int insertPicByMacId(@Param("macId") String macId, @Param("picId") String picId,
-			@Param("context") InputStream context);
+			@Param("context") InputStream context,@Param("alarm")Integer alarm);
 
 	int insertHeartBeat(@Param("macId") String macId, @Param("heartId") String heartId, @Param("ip") String ip,
 			@Param("port") String port);
 
 	HeartBeat getIpPortByMacId(@Param("macId") String macId);
 
-	List<CmPicture> getPicByMacId(@Param("macId") String macId);
+	List<CmPicture> getPicByMacId(@Param("macId") String macId, @Param("alarm")Integer alarm);
 
 	List<HeartBeat> getAllHeartBeatByMacId(@Param("macId") String macId);
 

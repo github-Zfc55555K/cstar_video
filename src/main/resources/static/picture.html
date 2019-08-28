@@ -2,12 +2,13 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>检测数据</title>
+	<title>监测数据</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<!--标准mui.css-->
 	<link rel="stylesheet" href="css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="css/mui.picker.min.css" />
 	<!--App自定义的css-->
 	<style type="text/css">
 		* {
@@ -214,6 +215,10 @@
 				<a class="mui-control-item " href="#content2">图片</a>
 			</div>
 		</div>
+		<div class="mui-content-padded">
+			<button id='date' data-options='{"type":"date"}' class="btn mui-btn mui-btn-block">选择日期 ...</button>
+		</div>
+
 		<div class="mui-content-padded mui-control-content " id="content2">
 			<div id="content">
 				加载图片中,loding....
@@ -233,8 +238,15 @@
 			</p> -->
 		</div>
 		<div class="mui-content-padded mui-control-content  mui-active" id="content1">
-			<div class="chart" id="barChart"></div>
+			<!-- <div class="chart" id="barChart"></div> -->
 			<div class="chart" id="lineChart"></div>
+			<h4 class="mui-content-padded">温度</h4>
+			<p id="hb"></p>
+			<div class="mui-content-padded" style="text-align:center;">
+				<ul id="pagination" class="mui-pagination">
+
+				</ul>
+			</div>
 		</div>
 	</div>
 </body>
@@ -242,7 +254,8 @@
 <script src="js/mui.zoom.js"></script>
 <script src="js/mui.previewimage.js"></script>
 <script src="libs/jquery-1.11.1.min.js"></script>
-<script src="libs/echarts-all.js"></script>
+<script src="libs/echarts.min.js"></script>
+<script src="js/mui.picker.min.js"></script>
 <script>
 
 	mui.previewImage();
@@ -251,7 +264,8 @@
 	$$.ajax({
 		url: "/getPicture",
 		data: {
-			macId: macId
+			macId: macId,
+			alarm: 0
 		},
 		success: function (data) {
 			var s = "";
@@ -268,66 +282,349 @@
 			mui.alert("发送指令失败:0001");
 		}
 	});
+	var data_x = [];
+	var data_y = [];
+	// for(var i = 0 ;i < 24;i ++){
+	// 	data_x.push(" ");
+	// }
+	var result = [];
+	$$.ajax({
+		url: "getAllTemperature",
+		data: {
+			macId: macId
+		},
+		async: false,
+		success: function (res) {
+			var localDate = localStorage.getItem("localDate");
+			if(localDate == null || localDate == ""){
+				localDate = getNowFormatDate();
+			}
+			$$("#date").html(localDate);
+			for(var i = 0;i < res.length;i++){
+				if(res[i].tId.indexOf(localDate) != -1){
+					result.push(res[i]);
+				}
+			}
+			// result = res;
+			for (var i = 0; i < result.length; i++) {
+				data_y.push(result[i].temperature);
+				// data_x.push(result[i].tId);
+				data_x.push(i + "时");
+			}
+		},
+		error: function () {
+			mui.alert("发送指令失败:0001");
+		}
+	});
 	var getOption = function (chartType) {
 		var chartOption = {
-				legend: {
-					data: ['温度']
+			legend: {
+				data: ['温度']
+			},
+			grid: {
+				x: 35,
+				x2: 10,
+				y: 30,
+				y2: 25
+			},
+			dataZoom: [
+				{
+					type: 'slider',
+					start: 1,
+					end: 35
 				},
-				grid: {
-					x: 35,
-					x2: 10,
-					y: 30,
-					y2: 25
-				},
-				toolbox: {
-					show: false,
-					feature: {
-						mark: {
-							show: true
-						},
-						dataView: {
-							show: true,
-							readOnly: false
-						},
-						magicType: {
-							show: true,
-							type: ['line', 'bar']
-						},
-						restore: {
-							show: true
-						},
-						saveAsImage: {
-							show: true
-						}
-					}
-				},
-				calculable: false,
-				xAxis: [{
-					type: 'category',
-					data: [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-				}],
-				yAxis: [{
-					type: 'value',
-					splitArea: {
+				{
+					type: 'inside',
+					start: 1,
+					end: 35
+				}
+			],
+			toolbox: {
+				show: false,
+				feature: {
+					mark: {
+						show: true
+					},
+					dataView: {
+						show: true,
+						readOnly: false
+					},
+					magicType: {
+						show: true,
+						type: ['line', 'bar']
+					},
+					restore: {
+						show: true
+					},
+					saveAsImage: {
 						show: true
 					}
-				}],
-				series: [{
-					name: '温度',
-					type: chartType,
-					data: [27.1, 28, 29, 30, 31.5, 32.6,33.7, 30, 29, 28, 28, 27]
-				}]
-			};
+				}
+			},
+			calculable: false,
+			xAxis: [{
+				type: 'category',
+				data: data_x
+			}],
+			yAxis: [{
+				type: 'value',
+				splitArea: {
+					show: true
+				},
+				axisLabel: { formatter: '{value} ℃' }
+			}],
+			series: [{
+				name: '温度',
+				type: chartType,
+				data: data_y
+			}]
+		};
 		return chartOption;
 	};
+
 	var byId = function (id) {
 		return document.getElementById(id);
 	};
-	var barChart = echarts.init(byId('barChart'));
-	barChart.setOption(getOption('bar'));
+	// var barChart = echarts.init(byId('barChart'));
+	// barChart.setOption(getOption('bar'));
 	var lineChart = echarts.init(byId('lineChart'));
 	lineChart.setOption(getOption('line'));
+	window.onresize = function () {
+		lineChart.resize();
+	}
 
+
+	//定义有关分页的全局变量
+	var pageNum = 1; //当前页
+	var pageSize = 10; //每页显示的数据
+	var total = result.length; //总数据数
+	var pages = Math.ceil(total / pageSize); //总页数
+	var navigatepageSize = Math.ceil(total / pageSize); //分页导航显示的页码数
+	var navigatepageNums = []; //当前页码导航
+
+	var s = "<p>";
+	var length = pageSize;
+	if (length > result.length) {
+		length = result.length;
+	}
+	for (var i = (pageNum - 1) * pageSize; i < length; i++) {
+		s += "<h5>时间：" + result[i].tId + "温度： " + result[i].temperature + "度</h5>";
+	}
+	s += "</p>";
+	$$("#hb").html(s);
+	/**
+    注意:如果有搜索功能，记得在搜索的时候将pageNum,navigatepageSize,navigatepageNums重置；
+    在pages小于navigatepageSize时，有多少page就显示多少格分页导航，navigatepageSize=pages；
+    在pages<=1 时就不要显示分页导航了,没用
+    */
+	//初始化页码导航数组
+	setNavigatepageNums(pageNum, navigatepageSize);
+	//初始化分页导航
+	initMuiPagination();
+
+	/**
+	*导航页码赋值,min为最小数值，size为数组大小
+	*/
+	function setNavigatepageNums(min, navigatepageSize) {
+		for (var i = 0; i < navigatepageSize; i++) {
+			navigatepageNums[i] = min;
+			min++;
+		}
+	}
+	//初始化分页导航
+	function initMuiPagination() {
+		var table = document.getElementById("pagination");
+		var html = "";
+		html += '<li class="mui-previous mui-disabled"><a href="#">&laquo;</a></li>';
+		html += '<li class="mui-active"><a href="#">' + pageNum + '</a></li>';
+		for (var i = 1; i < navigatepageSize; i++) {
+			html += '<li><a href="#">' + (pageNum + i) + '</a></li>';
+		}
+		html += '<li class="mui-next"><a href="#">&raquo;</a></li>';
+		table.innerHTML = html;
+	}
+
+	mui.init({
+		swipeBack: true //启用右滑关闭功能
+	});
+	(function ($) {
+		var btns = $('.btn');
+		btns.each(function (i, btn) {
+			btn.addEventListener('tap', function () {
+				var _self = this;
+				if (_self.picker) {
+					_self.picker.show(function (rs) {
+						result.innerText = '选择结果: ' + rs.text;
+						_self.picker.dispose();
+						_self.picker = null;
+					});
+				} else {
+					var optionsJson = this.getAttribute('data-options') || '{}';
+					var options = JSON.parse(optionsJson);
+					var id = this.getAttribute('id');
+					/*
+					 * 首次显示时实例化组件
+					 * 示例为了简洁，将 options 放在了按钮的 dom 上
+					 * 也可以直接通过代码声明 optinos 用于实例化 DtPicker
+					 */
+					_self.picker = new $.DtPicker(options);
+					_self.picker.show(function (rs) {
+						/*
+						 * rs.value 拼合后的 value
+						 * rs.text 拼合后的 text
+						 * rs.y 年，可以通过 rs.y.vaue 和 rs.y.text 获取值和文本
+						 * rs.m 月，用法同年
+						 * rs.d 日，用法同年
+						 * rs.h 时，用法同年
+						 * rs.i 分（minutes 的第二个字母），用法同年
+						 */
+						// result.innerText = '选择结果: ' + rs.text;
+						localStorage.setItem("localDate",rs.text);
+						location.reload();
+						// console.log(rs.text);
+						/* 
+						 * 返回 false 可以阻止选择框的关闭
+						 * return false;
+						 */
+						/*
+						 * 释放组件资源，释放后将将不能再操作组件
+						 * 通常情况下，不需要示放组件，new DtPicker(options) 后，可以一直使用。
+						 * 当前示例，因为内容较多，如不进行资原释放，在某些设备上会较慢。
+						 * 所以每次用完便立即调用 dispose 进行释放，下次用时再创建新实例。
+						 */
+						_self.picker.dispose();
+						_self.picker = null;
+					});
+				}
+
+			}, false);
+		});
+
+
+		$('.mui-pagination').on('tap', 'a', function () {
+			var li = this.parentNode;
+			var classList = li.classList;
+			if (!classList.contains('mui-active') && !classList.contains('mui-disabled')) {
+				var active = li.parentNode.querySelector('.mui-active');
+				if (classList.contains('mui-previous')) {//previous
+					if (active) {
+						var previous = active.previousElementSibling;
+						var flagPrevious = navigatepageNums.indexOf(pageNum - 1);
+						if (pageNum > 1 && flagPrevious < 0) {
+							var table = document.body.querySelector('.mui-pagination');
+							var html = "";
+							if (pageNum == 2) {
+								html += '<li class="mui-previous mui-disabled"><a href="#">&laquo;</a></li>';
+							} else {
+								html += '<li class="mui-previous"><a href="#">&laquo;</a></li>';
+							}
+							html += '<li class="mui-active"><a href="#">' + (pageNum - 1) + '</a></li>';
+							for (var i = 0; i < navigatepageSize - 1; i++) {
+								html += '<li><a href="#">' + (pageNum + i) + '</a></li>';
+							}
+							html += '<li class="mui-next"><a href="#">&raquo;</a></li>';
+							table.innerHTML = html;
+							//重设导航页码数组
+							setNavigatepageNums(pageNum - 1, navigatepageSize);
+							pageNum--;
+						}
+						if (pageNum > 1) {
+							if (previous) {
+								$.trigger(previous.querySelector('a'), 'tap');
+							}
+						} else {
+							classList.add('mui-disabled');
+						}
+						/* if (previous && !previous.classList.contains('mui-previous')) {
+							$.trigger(previous.querySelector('a'), 'tap');
+						} else {
+							classList.add('mui-disabled');
+						} */
+					}
+				} else if (classList.contains('mui-next')) {//next
+					if (active) {
+						var next = active.nextElementSibling;
+						// console.log("pageNum:" + pageNum + ";pages:" + pages);
+						//判断下一页的页码在不在导航页码数组里
+						var flagNext = navigatepageNums.indexOf(pageNum + 1);
+						//当前页在最后，且还有下一页，且下一页不在当前显示的导航页码里
+						if (pageNum >= navigatepageSize && pageNum < pages && flagNext < 0) {
+							var table = document.body.querySelector('.mui-pagination');
+							var html = "";
+							html += '<li class="mui-previous"><a href="#">&laquo;</a></li>';
+							for (var i = navigatepageSize - 2; i >= 0; i--) {
+								html += '<li><a href="#">' + (pageNum - i) + '</a></li>';
+							}
+							html += '<li class="mui-active"><a href="#">' + (pageNum + 1) + '</a></li>';
+							if (pageNum == pages - 1) {
+								html += '<li class="mui-next mui-disabled"><a href="#">&raquo;</a></li>';
+							} else {
+								html += '<li class="mui-next"><a href="#">&raquo;</a></li>';
+							}
+							table.innerHTML = html;
+							//重设导航页码数组
+							setNavigatepageNums(pageNum - navigatepageSize + 2, navigatepageSize);
+							pageNum++;
+						}
+						if (pageNum < pages) {
+							if (next) {
+								$.trigger(next.querySelector('a'), 'tap');
+							}
+						} else {
+							classList.add('mui-disabled');
+						}
+						/* var next = active.nextElementSibling;
+						console.log(next);
+						if (next && !next.classList.contains('mui-next')) {
+							$.trigger(next.querySelector('a'), 'tap');
+						} else {
+							classList.add('mui-disabled');
+						} */
+					}
+				} else {//page
+					active.classList.remove('mui-active');
+					classList.add('mui-active');
+					var page = parseInt(this.innerText); //当前页
+					pageNum = page; //当前页
+					var previousPageElement = li.parentNode.querySelector('.mui-previous'); //上一页按钮
+					var nextPageElement = li.parentNode.querySelector('.mui-next'); //下一页按钮
+					previousPageElement.classList.remove('mui-disabled');
+					nextPageElement.classList.remove('mui-disabled');
+					if (page <= 1) {
+						previousPageElement.classList.add('mui-disabled');
+					} else if (page >= pages) {
+						nextPageElement.classList.add('mui-disabled');
+					}
+				}
+			}
+			var s = "<p>";
+			var length = pageNum * pageSize;
+			if (length > result.length) {
+				length = result.length;
+			}
+			for (var i = (pageNum - 1) * pageSize; i < length; i++) {
+
+				s += "<h5>时间：" + result[i].tId + "温度： " + result[i].temperature + "度</h5>";
+			}
+			s += "</p>";
+			$$("#hb").html(s);
+		});
+	})(mui); 
+	function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = year + seperator1 + month + seperator1 + strDate;
+        return currentdate;
+    }
 </script>
 
 </html>

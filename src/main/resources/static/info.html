@@ -27,9 +27,7 @@
 			<p>每隔 5 （秒） 响 1（次） 响 60 （秒）</p>
 			<h4>像素参数</h4>
 			<p>2592*1944</p>
-			<h4>心跳</h4>
-			<p id="hb"></p>
-
+			
 		</div>
 	</div>
 </body>
@@ -41,23 +39,23 @@
 	mui.init({
 		swipeBack: true //启用右滑关闭功能
 	});
-	$$.ajax({
-		url: "/getHeartbeat",
-		data: {
-			macId : macId
-		},
-		success: function (result) {
-			var s = "";
-			for (var i = 0; i < result.length; i++) {
-				s += "时间：" + result[i].heartId + "ip:" + result[i].macIp + "端口号:" + result[i].macPort + "<br>";
-			}
-			$$("#hb").html(s);
-			console.log(result);
-		},
-		error: function () {
-			mui.alert("发送指令失败:0001");
-		}
-	});
+	// $$.ajax({
+	// 	url: "/getHeartbeat",
+	// 	data: {
+	// 		macId : macId
+	// 	},
+	// 	success: function (result) {
+	// 		var s = "";
+	// 		for (var i = 0; i < result.length; i++) {
+	// 			s += "时间：" + result[i].heartId + "ip:" + result[i].macIp + "端口号:" + result[i].macPort + "<br>";
+	// 		}
+	// 		$$("#hb").html(s);
+	// 		console.log(result);
+	// 	},
+	// 	error: function () {
+	// 		mui.alert("发送指令失败:0001");
+	// 	}
+	// });
 </script>
 
 </html>

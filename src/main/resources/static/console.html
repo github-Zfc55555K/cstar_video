@@ -72,15 +72,19 @@
 					<span class="mui-icon-extra mui-icon-extra-class"></span>
 					<div class="mui-media-body">监测数据</div>
 				</a></li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="info">
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="alarmpicture">
+					<span class="mui-icon-extra mui-icon-extra-lamp"></span>
+					<div class="mui-media-body">报警数据</div>
+				</a></li>
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="info">
 					<span class="mui-icon-extra mui-icon-extra-topic"></span>
 					<div class="mui-media-body">运行参数</div>
 				</a></li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="photo">
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="photo">
 					<span class="mui-icon-extra mui-icon-extra-phone"></span>
 					<div class="mui-media-body">手动拍摄</div>
 				</a></li>
-							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#">
+			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="heart">
 					<span class="mui-icon-extra mui-icon-extra-heart"></span>
 					<div class="mui-media-body">心跳</div>
 				</a></li>
@@ -92,12 +96,12 @@
 					<span class="mui-icon-extra mui-icon-extra-notice"></span>
 					<div class="mui-media-body">警报设置</div>
 				</a></li>
-			
+
 			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="pixel">
 					<span class="mui-icon-extra mui-icon-extra-computer"></span>
 					<div class="mui-media-body">像素设置</div>
 				</a></li>
-			
+
 
 			<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3"><a href="#" id="reset">
 					<span class="mui-icon-extra mui-icon-extra-new"></span>
@@ -266,17 +270,54 @@
 	}, false);
 	var reset = document.getElementById("reset");
 	reset.addEventListener('tap', function (event) {
-		console.log(macId);
+		// console.log(macId);
+		// console.log(this.classList);
+		var _this = this;
 		$$.ajax({
 			url: "/reset",
 			data: {
 				macId: macId
 			},
 			success: function (result) {
-
+				mui.toast("发送指令成功");
+				_this.classList.remove("active");
 			},
 			error: function (error) {
 				mui.alert("发送指令失败:0001");
+			}
+		});
+	}, false);
+	var heart = document.getElementById("heart");
+	heart.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'heart.html',
+			id: 'heart',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
+			}
+		});
+	}, false);
+	var alarmpicture = document.getElementById("alarmpicture");
+	alarmpicture.addEventListener('tap', function (event) {
+		mui.openWindow({
+			url: 'alarmpicture.html',
+			id: 'alarmpicture',
+			preload: true,
+			show: {
+				aniShow: 'pop-in'
+			},
+			styles: {
+				popGesture: 'hide'
+			},
+			waiting: {
+				autoShow: false
 			}
 		});
 	}, false);

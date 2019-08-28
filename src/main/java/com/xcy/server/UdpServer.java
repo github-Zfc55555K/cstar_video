@@ -66,7 +66,7 @@ public class UdpServer implements IUdpServer {
 				// 发送方消息 转字符串
 //				byte[] b = fromPacket.getData();
 				System.out.println(fromPacket.getLength());
-				//去掉空白字符
+				// 去掉空白字符
 				byte[] b = Arrays.copyOf(msg, fromPacket.getLength());
 				// String fromStr = new String(fromPacket.getData(), 0,
 				// fromPacket.getLength());
@@ -121,7 +121,7 @@ public class UdpServer implements IUdpServer {
 				} else {
 					// 发送成功标志
 					if (Constant.JC_TERMINAL_TO_SERVER.equals(frameType)) {
-						// 检测报文
+						// 监测报文
 						rm = new ReplyMsg(msgHeader, macId, fromInetAddress.toString(), formPort + "",
 								Constant.JC_SERVER_TO_TERMINAL, msgType, msglength, Constant.ZW_TWO_BYTE,
 								Constant.ZW_TWO_BYTE, Constant.TURE);
@@ -184,8 +184,9 @@ public class UdpServer implements IUdpServer {
 						DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, fromInetAddress,
 								formPort);
 						socket.send(sendPacket);
-						log.info("接收------<监测报文>------计算校验和成功,报文内容为:" + fromStr.substring(0, fromStr.length() - 4)
-								+ "校验和为：" + msgChx + "服务器计算的校验和为:" + chx);
+//						log.info("接收------<监测报文>------计算校验和成功,报文内容为:" + fromStr.substring(0, fromStr.length() - 4)
+//								+ "校验和为：" + msgChx + "服务器计算的校验和为:" + chx);
+						log.info("接收------<监测报文>------计算校验和成功");
 						log.info("发送------应答报文:" + rm.toString());
 					} else if (Constant.KZ_TERMINAL_TO_SERVER.equals(frameType)) {
 						// 控制报文
@@ -198,21 +199,74 @@ public class UdpServer implements IUdpServer {
 						log.info("接收------<控制报文>------计算校验和成功,报文内容为:" + fromStr.substring(0, fromStr.length() - 4)
 								+ "校验和为：" + msgChx + "服务器计算的校验和为:" + chx);
 					} else if (Constant.ZT_TERMINAL_TO_SERVER.equals(frameType)) {
-						// 状态报文
+						// 状态报文 包括 心跳 和 报警时的图片（这里由于硬件那边设计放在状态里面 所以将监测状态报文的直接copy过来）
 						rm = new ReplyMsg(msgHeader, macId, fromInetAddress.toString(), formPort + "",
-								Constant.ZT_SERVER_TO_TERMINAL, msgType, msglength, Constant.ZW_TWO_BYTE,
+								Constant.ZT_TERMINAL_TO_SERVER, msgType, msglength, Constant.ZW_TWO_BYTE,
 								Constant.ZW_TWO_BYTE, Constant.TURE);
-						message = new Message(msgHeader, macId, fromInetAddress.toString(), formPort + "", frameType,
-								msgType, msglength, currentPkg, totalPkg, msgContent, chx);
-						// 对message进行处理
-						this.udpService.executeZTerminalToServerTMessage(fromInetAddress.toString(), formPort + "",
-								message);
+						// 查看包完整性 等待偏移量=最大包数 目前只存在视频图像传输用到多个包发送数据 这里还是统一处理 在service 中再判断是哪种检测
+						message = messages.get(macId);
+						if (message == null) {
+							// 第一个包 ，在map中无记录
+							message = new Message(msgHeader, macId, fromInetAddress.toString(), formPort + "",
+									frameType, msgType, msglength, currentPkg, totalPkg, msgContent, chx);
+							if (fromStr.substring(46, 50).equals(fromStr.substring(50, 54))) {
+								log.info("总包数：" + fromStr.substring(50, 54) + "---------当前包数:"
+										+ fromStr.substring(46, 50));
+								if ("0001".equals(fromStr.substring(46, 50))) {
+									t1 = System.currentTimeMillis();
+								}
+								// 已经达到 最大偏移量 直接进行处理 不存入Map中
+								// 对message进行处理
+								this.udpService.executeZTerminalToServerTMessage(message, t1,
+										fromInetAddress.toString(), formPort + "");
+							} else {
+								log.info("总包数：" + fromStr.substring(50, 54) + "---------当前包数:"
+										+ fromStr.substring(46, 50));
+								if ("0001".equals(fromStr.substring(46, 50))) {
+									t1 = System.currentTimeMillis();
+								}
+								// 没有达到最大 偏移量
+								// 存入map中 等待下此继续获取数据
+								messages.put(macId, message);
+							}
+
+						} else {
+							// 在 map 中有记录 判断是否 达到最大偏移量
+							if (fromStr.substring(46, 50).equals(fromStr.substring(50, 54))) {
+								log.info("总包数：" + fromStr.substring(50, 54) + "---------当前包数:"
+										+ fromStr.substring(46, 50));
+								if ("0001".equals(fromStr.substring(46, 50))) {
+									t1 = System.currentTimeMillis();
+								}
+								// 达到最大偏移量
+								message.setMsgContent(message.getMsgContent() + msgContent);
+								// 清空 Map 中的报文缓存
+								messages.remove(macId);
+								if (messages.get(macId) != null) {
+									// 防止缓存
+									messages.remove(macId);
+								}
+								// 对massage进行处理
+								this.udpService.executeZTerminalToServerTMessage(message, t1,
+										fromInetAddress.toString(), formPort + "");
+							} else {
+								// 未达到最大偏移量
+								log.info("总包数：" + fromStr.substring(50, 54) + "---------当前包数:"
+										+ fromStr.substring(46, 50));
+								if ("0001".equals(fromStr.substring(46, 50))) {
+									t1 = System.currentTimeMillis();
+								}
+								message.setMsgContent(message.getMsgContent() + msgContent);
+								messages.put(macId, message);
+							}
+						}
 						sendBytes = NumberTransform.hexToBytes(rm.toString());
 						DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, fromInetAddress,
 								formPort);
 						socket.send(sendPacket);
-						log.info("接收------<状态报文>------计算校验和成功,报文内容为:" + fromStr.substring(0, fromStr.length() - 4)
-								+ "校验和为：" + msgChx + "服务器计算的校验和为:" + chx);
+//						log.info("接收------<状态报文>------计算校验和成功,报文内容为:" + fromStr.substring(0, fromStr.length() - 4)
+//								+ "校验和为：" + msgChx + "服务器计算的校验和为:" + chx);
+						log.info("接收------<状态报文>------计算校验和成功");
 						log.info("发送------应答报文:" + rm.toString());
 					}
 				}
