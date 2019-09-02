@@ -3,14 +3,18 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>像素设置</title>
+	<title>首页</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<!--标准mui.css-->
 	<link rel="stylesheet" href="css/mui.min.css">
-	<link href="css/mui.picker.css" rel="stylesheet" />
-	<link href="css/mui.poppicker.css" rel="stylesheet" />
+	<link rel="stylesheet" href="css/map.css">
+	<script src="js/mui.min.js"></script>
+	<script src="libs/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript"
+		src="https://webapi.amap.com/maps?v=1.4.14&key=9e5874d828f9b34a11abc264bf1342a0"></script>
+	<script type="text/javascript" src="js/mapUtil.js"></script>
 	<style>
 		html,
 		body,
@@ -28,18 +32,39 @@
 		.mui-card {
 			margin: 0px;
 		}
+
+		* {
+			touch-action: pan-y;
+		}
+
+		#container {
+			height: 140vw
+		}
+
+		.mac-color {
+			color: red
+		}
 	</style>
 </head>
 
 <body>
+
 	<header class="mui-bar mui-bar-nav">
 		<h1 class="mui-title">选择设备</h1>
 	</header>
 	<div class="mui-content">
-		<div class="mui-content-padded">
-			<h5 class="mui-content-padded">说明：清选择你要操作的设备ID号</h5>
-			<ul class="mui-table-view" id="macInfo">
-				<!-- <li class="mui-table-view-cell">
+		<div style="padding: 10px 10px;">
+			<div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted">
+				<a class="mui-control-item mui-active" href="#content1">设备选择</a>
+				<a class="mui-control-item " href="#content2">地理位置</a>
+			</div>
+		</div>
+
+		<div id="content1" class="mui-content-padded mui-control-content  mui-active">
+			<div class="mui-content-padded">
+				<h5 class="mui-content-padded">说明：清选择你要操作的设备ID号</h5>
+				<ul class="mui-table-view" id="macInfo">
+					<!-- <li class="mui-table-view-cell">
 					<a class="mui-navigate-right" id="Item1">
 						Item 1
 					</a>
@@ -54,62 +79,73 @@
 						Item 3
 					</a>
 				</li> -->
-			</ul>
-		</div>
-
-		<div class="mui-content">
-			<div class="mui-card">
-				<ul class="mui-table-view">
-					<li class="mui-table-view-cell mui-collapse">
-						<a class="mui-navigate-right" href="#" id="add">添加设备</a>
-						<div class="mui-collapse-content">
-							<form class="mui-input-group">
-								<div class="mui-input-row">
-									<label>设备简称</label>
-									<input type="text" class="mui-input-clear" placeholder="设备简称" id="macJc">
-								</div>
-								<div class="mui-input-row">
-									<label>设备唯一标识</label>
-									<input type="text" class="mui-input-clear" placeholder="设备唯一标识" id="macId">
-								</div>
-								<div class="mui-input-row">
-									<label>道路号</label>
-									<input type="text" class="mui-input-clear" placeholder="道路号" id="roadId">
-								</div>
-
-								<div class="mui-input-row">
-									<label>杆塔号</label>
-									<input type="text" class="mui-input-clear" placeholder="杆塔号" id="towerId">
-								</div>
-
-								<div class="mui-button-row">
-									<button id="btn" class="mui-btn mui-btn-primary" type="button"
-										onclick="return false;">添加</button>&nbsp;&nbsp;
-								</div>
-							</form>
-						</div>
-					</li>
-
 				</ul>
 			</div>
-		</div>
 
+			<div class="mui-content">
+				<div class="mui-card">
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell mui-collapse">
+							<a class="mui-navigate-right" href="#" id="add">添加设备</a>
+							<div class="mui-collapse-content">
+								<form class="mui-input-group">
+									<div class="mui-input-row">
+										<label>设备简称</label>
+										<input type="text" class="mui-input-clear" placeholder="设备简称" id="macJc">
+									</div>
+									<div class="mui-input-row">
+										<label>设备唯一标识</label>
+										<input type="text" class="mui-input-clear" placeholder="设备唯一标识" id="macId">
+									</div>
+									<div class="mui-input-row">
+										<label>道路号</label>
+										<input type="text" class="mui-input-clear" placeholder="道路号" id="roadId">
+									</div>
+
+									<div class="mui-input-row">
+										<label>杆塔号</label>
+										<input type="text" class="mui-input-clear" placeholder="杆塔号" id="towerId">
+									</div>
+
+									<div class="mui-input-row">
+										<label>GPS经度</label>
+										<input type="text" class="mui-input-clear" placeholder="GPS经度" id="gpsjd">
+									</div>
+
+									<div class="mui-input-row">
+										<label>GPS纬度</label>
+										<input type="text" class="mui-input-clear" placeholder="GPS纬度" id="gpswd">
+									</div>
+									<div class="mui-button-row">
+										<button id="btn" class="mui-btn mui-btn-primary" type="button"
+											onclick="return false;">添加</button>&nbsp;&nbsp;
+									</div>
+								</form>
+							</div>
+						</li>
+
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div id="content2" class="mui-content-padded mui-control-content">
+			<div id="container"></div>
+		</div>
 	</div>
-	<script src="js/mui.min.js"></script>
-	<script src="libs/jquery-1.11.1.min.js"></script>
+
+
 	<script>
 		var $$ = jQuery.noConflict();
+
+		var macList; // 设备
 		(function ($, doc) {
 			$.init();
+
 			//进入设备详情页
-			mui('.mui-content').on('tap', 'a', function (e) {
+			mui('#macInfo').on('tap', 'a', function (e) {
 				var id = this.getAttribute('id');
 				var road = this.getAttribute('road');
 				var tower = this.getAttribute('tower');
-				if (id == "add") {
-					return;
-				}
-
 				if (id != null) {
 					// mui.alert(id);
 					localStorage.setItem("macId", id);
@@ -124,7 +160,6 @@
 					url: 'console.html',
 					id: 'console'
 				});
-
 			});
 			$.ready(function () {
 				var userName = localStorage.getItem("userName");
@@ -134,10 +169,18 @@
 					data: {
 						userName: userName
 					},
+					async: false,
 					success: function (result) {
+						macList = result;
 						var str = "";
 						for (var i = 0; i < result.length; i++) {
-							str += '<li class="mui-table-view-cell"><a class="mui-navigate-right"tower="' + result[i].towerId + '" road="' + result[i].roadId + '" id="' + result[i].macId + '">' + result[i].macJc + '</a></li>';
+							var status = localStorage.getItem("status-" + result[i].macId);
+							if (status != 0) {
+								str += '<li class="mui-table-view-cell mac-color"><a class="mui-navigate-right"tower="' + result[i].towerId + '" road="' + result[i].roadId + '" id="' + result[i].macId + '">' + result[i].macJc + '</a></li>';
+							} else {
+								str += '<li class="mui-table-view-cell"><a class="mui-navigate-right"tower="' + result[i].towerId + '" road="' + result[i].roadId + '" id="' + result[i].macId + '">' + result[i].macJc + '</a></li>';
+							}
+
 						}
 						$$("#macInfo").html(str);
 					},
@@ -145,9 +188,98 @@
 						mui.alert("网络错误：1003");
 					}
 				});
-
+				init2();
 			});
 		})(mui, document);
+		/**
+			 * 使用高德地图
+			 */
+
+		var _AMAP = null; // 高德地图全局变量
+
+		var init2 = function () {
+			var _zoom = 12;
+			//----------------------------------------------注册地图、插件、信息窗体 ↓ -----------------------------------------
+			//初始化地图
+			_AMAP = new AMap.Map("container", {
+				resizeEnable: true,
+				pitchEnable: true,
+				zoom: 12,
+				pitch: 20,
+				rotation: 0,
+				viewMode: '2D',
+				expandZoomRange: true,
+				zooms: [3, 20],
+				showIndoorMap: false,
+				center: [114.422794, 30.47004],
+				mapStyle: 'amap://styles/fresh'
+
+			});
+			//加载地图 插件
+			_AMAP.plugin(['AMap.ControlBar', 'AMap.Scale', 'AMap.PolyEditor'], function () {//增加插件
+				var controlBar = new AMap.ControlBar();
+				var scale = new AMap.Scale({
+					visible: true,
+					bottom: 100
+				});
+				_AMAP.addControl(controlBar);
+				_AMAP.addControl(scale);
+			});
+
+			//地图工具类
+			var mapUtil = new MapUtil();
+			//加载地图时查询数据
+			// var list = mapUtil.queryNode('/ltvs_management/getTransformerInfo', {});
+			//信息窗体
+			var infoWindow = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -30) });
+			//点击事件函数
+			var markerClick = function markerClick(e) {
+				infoWindow.setContent(e.target.content);
+				infoWindow.open(_AMAP, e.target.getPosition());
+			}
+			//------------------------------------------------- 注册地图 ↑ -----------------------------------------------
+			//---------------------------------------------初始化地图上加载点 ↓ -------------------------------------------
+			if (macList.length > 0) {
+				for (var i = 0, marker; i < macList.length; i++) {
+					if (isNaN(parseFloat(macList[i].gpsjd)) || isNaN(parseFloat(macList[i].gpswd))) {
+						continue;
+					}
+					var marker = new AMap.Marker({
+						position: [parseFloat(macList[i].gpsjd), parseFloat(macList[i].gpswd)],
+						map: _AMAP,
+						icon: mapUtil.getMarkImg(1)
+					});
+					// marker.content = ;
+					marker.content = '<a href="javascript:openWindow(' + JSON.stringify(macList[i]).replace(/\"/g, "'") + ');">' + macList[i].macJc + '</a>';
+					marker.on('click', markerClick);
+					// marker.emit('click', { target: marker });
+				}
+			}
+
+			//根据点的分布 自适应
+			_AMAP.setFitView();
+			//---------------------------------------------------初始化 加载 地图 ↑-------------------------------
+
+			//在控制台上显示点击的位置
+			_AMAP.on('click', findJW);
+		}
+
+
+		var openWindow = function (node) {
+			console.log(node);
+			localStorage.setItem("macId", node.macId);
+			localStorage.setItem("road", node.roadId);
+			localStorage.setItem("tower", node.towerId);
+			mui.openWindow({
+				url: 'console.html',
+				id: 'console'
+			});
+		}
+		var findJW = function (e) {
+			console.log('点击的坐标为:' + e.lnglat.getLng() + ',' + e.lnglat.getLat());
+		}
+
+
 
 		//添加设备
 		document.getElementById("btn").addEventListener('tap', function (event) {
@@ -208,6 +340,7 @@
 			// });
 
 		});
+
 	</script>
 </body>
 

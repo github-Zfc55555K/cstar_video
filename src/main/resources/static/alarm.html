@@ -35,46 +35,64 @@
 		<h1 class="mui-title">报警设置</h1>
 	</header>
 	<div class="mui-content">
-		<div class="mui-content-padded">
-			<h5 class="mui-content-padded">说明:设置警报的频率,请设置<总时间>大于其他参数</h5>
-			<h5 class="mui-content-padded" id="name"></h5>
-			<div class="mui-card">
-				<div class="mui-input-row">
-					<label>总时间(秒)</label>
-					<div class="mui-numbox" data-numbox-min='0'>
-						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
-						<input class="mui-input-numbox" type="number" id="box1" />
-						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
-					</div>
-				</div>
-				<div class="mui-input-row">
-					<label>警报间隔(秒)</label>
-					<div class="mui-numbox" data-numbox-min='0'>
-						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
-						<input class="mui-input-numbox" type="number" id="box2" />
-						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
-					</div>
-				</div>
-				<div class="mui-input-row">
-					<label>持续时间(秒)</label>
-					<div class="mui-numbox" data-numbox-min='0'>
-						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
-						<input class="mui-input-numbox" type="number" id="box3" />
-						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
-					</div>
-				</div>
-				<div class="mui-input-row">
-					<label>超声波距离(米)</label>
-					<div class="mui-numbox" data-numbox-min='0'>
-						<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
-						<input class="mui-input-numbox" type="number" id="box4" />
-						<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
-					</div>
-				</div>
+		<div style="padding: 10px 10px;">
+			<div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted">
+				<a class="mui-control-item mui-active" href="#content1">报警频率</a>
+				<a class="mui-control-item " href="#content2">超声波距离</a>
 			</div>
-			<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
-				id="btn">确认</button>
+		</div>
+		<div id="content1" class="mui-content-padded mui-control-content mui-active">
+			<div class="mui-content-padded">
+				<h5 class="mui-content-padded">说明:设置警报的频率,请设置<总时间>大于其他参数</h5>
+				<h5 class="mui-content-padded" id="name"></h5>
+				<div class="mui-card">
+					<div class="mui-input-row">
+						<label>总时间(秒)</label>
+						<div class="mui-numbox" data-numbox-min='1'>
+							<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+							<input class="mui-input-numbox" type="number" id="box1" />
+							<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+						</div>
+					</div>
+					<div class="mui-input-row">
+						<label>警报间隔(秒)</label>
+						<div class="mui-numbox" data-numbox-min='1'>
+							<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+							<input class="mui-input-numbox" type="number" id="box2" />
+							<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+						</div>
+					</div>
+					<div class="mui-input-row">
+						<label>持续时间(秒)</label>
+						<div class="mui-numbox" data-numbox-min='1'>
+							<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+							<input class="mui-input-numbox" type="number" id="box3" />
+							<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+						</div>
+					</div>
 
+				</div>
+				<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
+					id="btn">确认</button>
+			</div>
+		</div>
+		<div id="content2" class="mui-content-padded mui-control-content">
+			<div class="mui-content-padded">
+				<h5 class="mui-content-padded">说明:设置超声波警报的频率</h5>
+				<div class="mui-card">
+					<div class="mui-input-row">
+						<label>超声波距离(米)</label>
+						<div class="mui-numbox" data-numbox-min='1'>
+							<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+							<input class="mui-input-numbox" type="number" id="box4" />
+							<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+						</div>
+					</div>
+				</div>
+				<button type="button" class="mui-btn mui-btn-block mui-btn-primary" style="margin-top: 300px"
+					id="btn2">确认</button>
+
+			</div>
 		</div>
 	</div>
 	<script src="js/mui.min.js"></script>
@@ -88,11 +106,11 @@
 			var box1 = document.getElementById("box1").value;
 			var box2 = document.getElementById("box2").value;
 			var box3 = document.getElementById("box3").value;
-			if(parseInt(box1) < parseInt(box2) || parseInt(box1) < parseInt(box3)){
+			if (parseInt(box1) <= parseInt(box2) || parseInt(box1) <= parseInt(box3)) {
 				mui.alert("参数设置不合法！！");
 				return;
 			}
-			if(macId == "" || macId == null){
+			if (macId == "" || macId == null) {
 				mui.alert("无确定的设备，错误:0003");
 				return;
 			}
@@ -105,9 +123,34 @@
 					box3: box3
 				},
 				success: function (result) {
-					if(result == "ok"){
+					if (result == "ok") {
 						mui.toast("指令发送成功");
-					}else{
+					} else {
+						mui.alert("发送指令失败:0002");
+					}
+				},
+				error: function () {
+					mui.alert("发送指令失败:0001");
+				}
+			});
+		});
+		document.getElementById("btn2").addEventListener('tap', function (event) {
+			// mui.alert('当前值: ' + document.getElementById("box1").value + document.getElementById("box2").value + document.getElementById("box3").value, null, "确定");
+			var box4 = document.getElementById("box4").value;
+			if (macId == "" || macId == null) {
+				mui.alert("无确定的设备，错误:0003");
+				return;
+			}
+			$$.ajax({
+				url: "/ultrasonicCtrl",
+				data: {
+					macId: macId,
+					distance: box4
+				},
+				success: function (result) {
+					if (result == "ok") {
+						mui.toast("指令发送成功");
+					} else {
 						mui.alert("发送指令失败:0002");
 					}
 				},

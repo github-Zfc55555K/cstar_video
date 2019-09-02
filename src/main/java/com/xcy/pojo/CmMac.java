@@ -10,6 +10,33 @@ public class CmMac {
 	private String macJc;
 	private String roadId;
 	private String towerId;
+	private String gpsjd;
+	private String gpswd;
+	private Integer msgStatus;
+
+	public Integer getMsgStatus() {
+		return msgStatus;
+	}
+
+	public void setMsgStatus(Integer msgStatus) {
+		this.msgStatus = msgStatus;
+	}
+
+	public String getGpsjd() {
+		return gpsjd;
+	}
+
+	public void setGpsjd(String gpsjd) {
+		this.gpsjd = gpsjd;
+	}
+
+	public String getGpswd() {
+		return gpswd;
+	}
+
+	public void setGpswd(String gpswd) {
+		this.gpswd = gpswd;
+	}
 
 	public String getUserId() {
 		return userId;

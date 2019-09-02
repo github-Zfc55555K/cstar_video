@@ -46,13 +46,17 @@
 		<result column="macId" property="macId" />
 		<result column="roadId" property="roadId" />
 		<result column="towerId" property="towerId" />
+		<result column="gpsjd" property="gpsjd" />
+		<result column="gpswd" property="gpswd" />
 	</resultMap>
 	<select id="getMacByUserName" resultMap="mMap">
 	SELECT
 	a.MACID,
 	a.MACJC,
 	a.ROADID,
-	a.TOWERID
+	a.TOWERID,
+	a.GPSJD,
+	a.GPSWD
 	FROM
 	cm_mac a
 	WHERE

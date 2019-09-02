@@ -132,6 +132,7 @@
 	var macId = localStorage.getItem("macId");
 	var road = localStorage.getItem("road");
 	var tower = localStorage.getItem("tower");
+	localStorage.setItem("status-" + macId, 0);
 	var str = "当前设备:<br>唯一标识：" + macId + "<br>道路信息：" + road + "<br>杆塔信息：" + tower;
 	$$("#macinfo").html(str);
 	mui.plusReady(function () {

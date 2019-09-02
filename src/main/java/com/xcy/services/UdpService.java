@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.xcy.pojo.ControlMsg;
@@ -30,6 +31,9 @@ public class UdpService {
 	private CmService cmService;
 
 	private static UdpService udpService;
+
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 
 	@PostConstruct
 	public void init() {
@@ -101,6 +105,14 @@ public class UdpService {
 				this.sendMessage(hb.getMacIp(), Integer.parseInt(hb.getMacPort()), controlMsg.toString());
 				log.info("发送------<控制报文 手动拍摄>------" + controlMsg.toString());
 			}
+		} else if (type == Constant.KZ_MSG_ULTRASONIC) {
+			// 超声波设置
+			String content = "0001" + Constant.KZ_KEY_SET_ULTRASONIC
+					+ NumberTransform.numToHex32(Integer.parseInt(msg.get("ultrasonic")));
+			controlMsg = new ControlMsg("0102", hb.getMacId(), Constant.KZ_SERVER_TO_TERMINAL,
+					Constant.KZ_TYPE_PARAM_SET, "0008", "0001", "0001", content);
+			this.sendMessage(hb.getMacIp(), Integer.parseInt(hb.getMacPort()), controlMsg.toString());
+			log.info("发送------<控制报文 超声波设置>------" + controlMsg.toString());
 		}
 		return 1;
 	}
@@ -164,9 +176,12 @@ public class UdpService {
 			log.info("<状态报文>-------心跳：" + context);
 			UdpService.udpService.cmService.insertHeartBeat(message.getMacId(), NumberTransform.getData(),
 					args[0].substring(1), args[1]);
-		}else if(Constant.ZT_TYPE_BASIC_INFO.equals(message.getMsgType())) {
-			//上传 基本信息
+		} else if (Constant.ZT_TYPE_BASIC_INFO.equals(message.getMsgType())) {
+			// 上传 基本信息
 			String context = message.getMsgContent();
+			String macId = message.getMacId();
+			// 这里由于上传的基本信息改动特别多,所以直接存储在redis 数据库中
+			stringRedisTemplate.opsForValue().set("basic_info::" + macId, context);
 			log.info("<状态报文>-------基本信息：" + context);
 		}
 
@@ -182,7 +197,7 @@ public class UdpService {
 			byte[] bytes = NumberTransform.hexToBytes(msg);
 			DatagramPacket fromPacket = new DatagramPacket(bytes, bytes.length, inet, port);
 			UdpServer.socket.send(fromPacket);
-			log.info("发送------<控制报文>------：" + msg + "<ip>+" + ip + "<端口号>:" + port);
+			log.info("发送------<报文> ====>>>>：<ip>" + ip + "<端口号>:" + port);
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();

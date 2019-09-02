@@ -31,6 +31,7 @@ public interface Constant {
 	int KZ_MSG_ALARM = 2; //警报设置
 	int KZ_MSG_RESET = 3;//复位
 	int KZ_MSG_PHOTO = 4;//手动拍摄
+	int KZ_MSG_ULTRASONIC = 5;//超声波设置
 	String ZT_TYPE_BASIC_INFO = "01";
 	String ZT_TYPE_HEART = "05";
 	String ZT_TYPE_ALARM = "09";
@@ -66,6 +67,7 @@ public interface Constant {
 	String KZ_KEY_SET_LENS_2 = "0009";
 	String KZ_KEY_SET_LENS_3 = "000A";
 	String KZ_KEY_SET_PIXEL = "000B";//设置分辨率
+	String KZ_KEY_SET_ULTRASONIC = "000D";//设置超声波
 	
 	String KZ_VALUE_ON = "00000001";// 开
 	String KZ_VALUE_OFF = "00000000";// 关
